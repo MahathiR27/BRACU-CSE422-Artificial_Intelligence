@@ -3,21 +3,21 @@ from heapq import *
 
 in_f = open("input.txt", 'r')
 
-v,e = map(int, in_f.readline().split())
+v,e = map(int, in_f.readline().split()) # No of vertex and edges
 v+=1
 
-graph = {i:[] for i in range(1,v)}
+graph = {i:[] for i in range(1,v)} # Graph er empty dict
 in_f.readline()
 
 start,goal = map(int,in_f.readline().split())
 in_f.readline()
 
-h = {}
-for i in range(1,v):
+h = {} 
+for i in range(1,v): # Adding the heuristic values in dict
   h[i] = int(in_f.readline().split()[1])
 in_f.readline()
 
-for i in range(e):
+for i in range(e): # Adding edges in the graph dict
   a,b = map(int,in_f.readline().split())
   graph[a].append(b)
   graph[b].append(a)
@@ -26,6 +26,7 @@ for i in range(e):
 # Heuristic: {h}
 # Graph: {graph}''')
 
+# Dijkstra Algo starting from goal to find all g(n)
 actual_cost = {i:math.inf for i in range(1,v)}
 queue = []
 
@@ -49,7 +50,7 @@ dijkstra(queue)
 not_admissible = []
 
 for i in graph.keys():
-  if h[i] > actual_cost[i]:
+  if h[i] > actual_cost[i]: # To be admissible, h(n) <= g(n)
     not_admissible.append(str(i))
 
 if len(not_admissible) == 0:
