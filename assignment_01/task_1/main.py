@@ -24,10 +24,9 @@ def gen_h(node): # Generate manhattan distance
   return abs(x1-x2)+abs(y1-y2)
 
 queue = []
-heappush(queue,(gen_h(start), start))
+heappush(queue,(gen_h(start),0,start,[]))
 
 visited = []
-path = []
 
 def valid(node): # node ki adow valid?
   x,y = node
@@ -35,8 +34,11 @@ def valid(node): # node ki adow valid?
     return True
   return False
 
+maybe_paths = {}
+
 def all_paths(node): # All possible ways to go from a node
-  paths = {}
+  nodes_to_go = []
+
   x,y = node
 
   down = (x+1,y)
@@ -44,31 +46,40 @@ def all_paths(node): # All possible ways to go from a node
   right = (x,y+1)
 
   if valid(down):
-    paths['D'] = down
+    maybe_paths[down] = 'D'
+    nodes_to_go.append(down)
 
   if valid(left):
-    paths['L'] = left
+    maybe_paths[left] = 'L'
+    nodes_to_go.append(left)
 
   if valid(right):
-    paths['R'] = right
-  
-  return paths
+    maybe_paths[right] = 'R'
+    nodes_to_go.append(right)
 
+  return nodes_to_go
 
 def a_star(queue):
   if len(queue) == 0:
     return -1
   else:
-    h, node = heappop(queue)
+    h, cost, node, path = heappop(queue)
     visited.append(node)
-    #print(visited)
+    # print(node)
+    # print(queue)
     if node == goal:
-      return 1
+      return path
 
-    for direction, new_node in all_paths(node).items():
-      h_new = gen_h(new_node) + 1
-      heappush(queue,(h_new,new_node))
-
+    for new_node in all_paths(node): # Oi node theke dane bame niche joto jawar jayga ase check kore list e add kortese
+      new_cost = cost + 1 # Sob node er cost parent node er cost theke 1 beshi.
+      h_new = gen_h(new_node) + new_cost
+      heappush(queue,(h_new,cost,new_node,path + [maybe_paths[new_node]])) # Existing jei path ase oi path er sathe new dhore ana node add
+# Basically jei node jei path ei jak shei path e nije nije store korbe and goal e jei node reach korbe oitar path return korbo
     return a_star(queue)
 
-print(a_star(queue))
+res = a_star(queue)
+if res != -1:
+  print(len(res))
+  print("".join(res))
+else:
+  print(-1)
