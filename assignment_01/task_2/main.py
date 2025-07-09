@@ -46,4 +46,13 @@ def dijkstra(queue):
 
 dijkstra(queue)
 
-print("Actual Cost for each node to reach goal:", actual_cost)
+not_admissible = []
+
+for i in graph.keys():
+  if h[i] > actual_cost[i]:
+    not_admissible.append(str(i))
+
+if len(not_admissible) == 0:
+  print(1)
+else:
+  print(f"0\n\nHere nodes {",".join(not_admissible)} are inadmissible.")
