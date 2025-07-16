@@ -8,7 +8,8 @@ connections = ((3,0), (2,0), (0,1), (3,5), (1,4), (4,5)) # Kon index er componen
 
 overlap_penalty, wiring_penalty = 1000, 2
 
-population = []
+p_population = []
+c_population = []
 parent_f = {}
 child_f = {}
 
@@ -102,29 +103,58 @@ def fitness(cromo):
   
   fitness_value = -(overlap_penalty*overlap_count + wiring_penalty*wire_distance + bounding_box)
   
-  print("Overlap:",overlap_count)
-  print("Wire Distance:",wire_distance)
-  print("Bounding Box:",bounding_box)
-  print("Fitness value:",fitness_value)
+  child_f[fitness_value] = cromo
   
-def ga(population):
-  for cromo in population:
-    fitness(cromo)
+  # print("Overlap:",overlap_count)
+  # print("Wire Distance:",wire_distance)
+  # print("Bounding Box:",bounding_box)
+  # print("Fitness value:",fitness_value)
+
+def cross(temp_population):
+  point = random.randint(1,5)
+  random.shuffle(temp_population)
+  new_population = []
+  
+  i = 0
+  while i < 6: # Shuffled parent and er porer ta diye off spring
+    new_cromo1 = temp_population[i][:point] + temp_population[i+1][point:]
+    new_cromo2 = temp_population[i+1][:point] + temp_population[i][point:]
+    
+    new_population.append(new_cromo1)
+    new_population.append(new_cromo2)
+
+    i+=2
+    
+  # print("Crossed")
+  
+  return new_population
+
+def ga(tmep_population):
+  global p_population
+  global c_population
+  
+  for gen in range (2):
+    for cromo in tmep_population:
+      fitness(cromo)
+    
+    if len(p_population) == 0: # Jodi Parent na thake no need for elitism
+      p_population = c_population.copy()
+      c_population = cross(p_population)
 
 for j in range (6): # Creating start population
   x = []
   for i in range (6):
     x.append(generate_node(i))
-  population.append(x)
+  c_population.append(x)
 
-for i in population:
-  print(i)
+# for i in c_population:
+#   print(i)
 
-# population = [[(9, 6), (7, 12), (1, 0), (10, 9), (16, 6), (16, 5)],
+# c_population = [[(9, 6), (7, 12), (1, 0), (10, 9), (16, 6), (16, 5)],
 # [(18, 19), (15, 14), (19, 17), (10, 3), (11, 20), (3, 17)],
 # [(9, 17), (8, 4), (4, 20), (10, 10), (2, 5), (20, 15)],
 # [(19, 9), (17, 14), (0, 9), (16, 19), (4, 10), (16, 4)],
 # [(17, 18), (13, 2), (5, 19), (12, 19), (20, 0), (7, 7)],
 # [(18, 0), (9, 2), (6, 17), (6, 9), (0, 20), (0, 13)]]
 
-ga(population)
+ga(c_population)
