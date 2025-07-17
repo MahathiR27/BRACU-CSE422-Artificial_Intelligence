@@ -10,8 +10,8 @@ overlap_penalty, wiring_penalty = 1000, 2
 
 p_population = []
 c_population = []
-parent_f = {}
-child_f = {}
+parent_f = []
+child_f = []
 
 def grid_checker(co_ordinate,block_num): # block_num = component er index number to get the dimension
   block = blocks[block_num]
@@ -24,7 +24,7 @@ def grid_checker(co_ordinate,block_num): # block_num = component er index number
 
 def generate_node(block_num): # Random ekta generate korbe and block_number wise grid_checker marbe false ashle recurs
   node = (random.randint(0,25), random.randint(0,25))
-  if grid_checker(node,0):
+  if grid_checker(node,block_num):
     return node
   #print("Regenerate")
   return generate_node(block_num)
@@ -51,7 +51,7 @@ def overlap(node1,block_num1,node2,block_num2):
 
   return overlap
 
-def wire(cromo):
+def wire(cromo): #Center to center wire distance
   wire_distance = 0
   for c in connections:
     i, j = c
@@ -88,8 +88,7 @@ def box(cromo):
   
   return (x_max - x_min) * (y_max - y_min) # Copy
 
-
-def fitness(cromo):
+def fitness(cromo, output = False):
   # Count overlap count of a cromo
   overlap_count = 0
   for i in range (0,5):
@@ -103,12 +102,14 @@ def fitness(cromo):
   
   fitness_value = -(overlap_penalty*overlap_count + wiring_penalty*wire_distance + bounding_box)
   
-  child_f[fitness_value] = cromo
+  child_f.append((fitness_value,cromo))
   
-  # print("Overlap:",overlap_count)
-  # print("Wire Distance:",wire_distance)
-  # print("Bounding Box:",bounding_box)
-  # print("Fitness value:",fitness_value)
+  if output:
+    print("the total overlap counts:",overlap_count)
+    print("total wiring length:",wire_distance)
+    print("the total bounding box area",bounding_box)
+    print("best total fitness value:",fitness_value)
+    print("optimal placement of bottom-left coordinates:", cromo)
 
 def cross(temp_population):
   point = random.randint(1,5)
@@ -129,17 +130,52 @@ def cross(temp_population):
   
   return new_population
 
-def ga(tmep_population):
-  global p_population
-  global c_population
+def mutate(temp_population):
+  if 5 <= random.randint(0,100) <= 10:
+    cromo = temp_population[random.randint(0,5)]
+    gene = random.randint(0,5)
+    cromo[gene] = generate_node(gene)
+    
+    # print("Mutated")
+  return temp_population
+
+def main():
+  global p_population, c_population, parent_f, child_f
   
-  for gen in range (2):
-    for cromo in tmep_population:
+  for gen in range (15):
+    if len(p_population) != 0: # Sob gula element same hoye gele plateau
+      plateu = True
+      tester = p_population[0]
+      
+      for i in p_population:
+        if tester != i:
+          plateu = False
+
+      if plateu:
+        return p_population[0] # plateau hoise just return any cromo 
+
+    for cromo in c_population: # Fitness check
       fitness(cromo)
     
     if len(p_population) == 0: # Jodi Parent na thake no need for elitism
       p_population = c_population.copy()
-      c_population = cross(p_population)
+      c_population = mutate(cross(p_population))
+    
+    else: # Elitism
+      stupid_child = sorted(child_f)[0] # Sort korle only key value gula Ascending order hoye jay
+      elite_parent = sorted(parent_f)[-1]
+      
+      c_population.remove(stupid_child[1])
+      c_population.append(elite_parent[1])
+    
+      p_population = c_population.copy()
+      c_population = mutate(cross(p_population))
+    
+    # Next generation dhorar age mane this gen parents
+    parent_f = child_f.copy() # Child der parent banaye diye child reset
+    child_f = []
+    
+  return sorted(parent_f)[-1][1] #15 ta iteration sesh hoile just result the cromo with best fitness. 
 
 for j in range (6): # Creating start population
   x = []
@@ -147,14 +183,5 @@ for j in range (6): # Creating start population
     x.append(generate_node(i))
   c_population.append(x)
 
-# for i in c_population:
-#   print(i)
 
-# c_population = [[(9, 6), (7, 12), (1, 0), (10, 9), (16, 6), (16, 5)],
-# [(18, 19), (15, 14), (19, 17), (10, 3), (11, 20), (3, 17)],
-# [(9, 17), (8, 4), (4, 20), (10, 10), (2, 5), (20, 15)],
-# [(19, 9), (17, 14), (0, 9), (16, 19), (4, 10), (16, 4)],
-# [(17, 18), (13, 2), (5, 19), (12, 19), (20, 0), (7, 7)],
-# [(18, 0), (9, 2), (6, 17), (6, 9), (0, 20), (0, 13)]]
-
-ga(c_population)
+fitness(main(),True)
