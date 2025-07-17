@@ -88,7 +88,7 @@ def box(cromo):
   
   return (x_max - x_min) * (y_max - y_min) # Copy
 
-def fitness(cromo, output = False):
+def fitness(cromo, output = ''): # Flag to detect final output
   # Count overlap count of a cromo
   overlap_count = 0
   for i in range (0,5):
@@ -100,11 +100,11 @@ def fitness(cromo, output = False):
   wire_distance = round(wire(cromo),2)
   bounding_box = box(cromo)
   
-  fitness_value = -(overlap_penalty*overlap_count + wiring_penalty*wire_distance + bounding_box)
+  fitness_value = round(-(overlap_penalty*overlap_count + wiring_penalty*wire_distance + bounding_box),2)
   
   child_f.append((fitness_value,cromo))
   
-  if output:
+  if output.upper() == "OUTPUT":
     print("the total overlap counts:",overlap_count)
     print("total wiring length:",wire_distance)
     print("the total bounding box area",bounding_box)
@@ -130,6 +130,26 @@ def cross(temp_population):
   
   return new_population
 
+def two_cross(temp_population):
+  point_1 = random.randint(1,4)
+  point_2 = random.randint(point_1,5) # 2nd point always 1st point er pore
+  random.shuffle(temp_population)
+  new_population = []
+  
+  i = 0
+  while i < 6: # Shuffled parent and er porer ta diye off spring
+    new_cromo1 = temp_population[i][:point_1] + temp_population[i+1][point_1:point_2] + temp_population[i][point_2:]
+    new_cromo2 = temp_population[i+1][:point_1] + temp_population[i][point_1:point_2] + temp_population[i+1][point_2:]
+    
+    new_population.append(new_cromo1)
+    new_population.append(new_cromo2)
+
+    i+=2
+    
+  # print("2 Point Crossed")
+  
+  return new_population
+
 def mutate(temp_population):
   if 5 <= random.randint(0,100) <= 10:
     cromo = temp_population[random.randint(0,5)]
@@ -139,11 +159,11 @@ def mutate(temp_population):
     # print("Mutated")
   return temp_population
 
-def main():
+def main(two_point = ""):
   global p_population, c_population, parent_f, child_f
   
   for gen in range (15):
-    if len(p_population) != 0: # Sob gula element same hoye gele plateau
+    if len(p_population) != 0: # Goal test: Sob gula element same hoye gele plateau
       plateu = True
       tester = p_population[0]
       
@@ -157,20 +177,24 @@ def main():
     for cromo in c_population: # Fitness check
       fitness(cromo)
     
-    if len(p_population) == 0: # Jodi Parent na thake no need for elitism
-      p_population = c_population.copy()
-      c_population = mutate(cross(p_population))
+    # if len(p_population) == 0: # Jodi Parent na thake no need for elitism
+    #   p_population = c_population.copy()
+    #   c_population = mutate(cross(p_population))
     
-    else: # Elitism
+    if len(p_population) != 0: # Elitism
       stupid_child = sorted(child_f)[0] # Sort korle only key value gula Ascending order hoye jay
       elite_parent = sorted(parent_f)[-1]
       
       c_population.remove(stupid_child[1])
       c_population.append(elite_parent[1])
-    
-      p_population = c_population.copy()
+      
+    # Elitism korle korse na korle ja chilo oita  e parent kore diye new create korbe
+    p_population = c_population.copy()
+    if two_point.upper() == "TWO":
+      c_population = mutate(two_cross(p_population))
+    else:
       c_population = mutate(cross(p_population))
-    
+      
     # Next generation dhorar age mane this gen parents
     parent_f = child_f.copy() # Child der parent banaye diye child reset
     child_f = []
@@ -184,4 +208,10 @@ for j in range (6): # Creating start population
   c_population.append(x)
 
 
-fitness(main(),True)
+# fitness(main(),"OUTPUT")
+
+# Task 2:
+
+# main("TWO") for 2 point cross over
+# fitness({population}, "OUTPUT") for printing best fit stats
+fitness(main("TWO"),"OUTPUT") 
