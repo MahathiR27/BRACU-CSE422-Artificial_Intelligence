@@ -34,7 +34,7 @@ def valid(node): # node ki adow valid?
     return True
   return False
 
-maybe_paths = {}
+b = {}
 
 def all_paths(node): # All possible ways to go from a node
   nodes_to_go = []
@@ -46,15 +46,15 @@ def all_paths(node): # All possible ways to go from a node
   right = (x,y+1)
 
   if valid(down):
-    maybe_paths[down] = 'D'
+    b[down] = 'D'
     nodes_to_go.append(down)
 
   if valid(left):
-    maybe_paths[left] = 'L'
+    b[left] = 'L'
     nodes_to_go.append(left)
 
   if valid(right):
-    maybe_paths[right] = 'R'
+    b[right] = 'R'
     nodes_to_go.append(right)
 
   return nodes_to_go
@@ -73,7 +73,7 @@ def a_star(queue):
     for new_node in all_paths(node): # Oi node theke dane bame niche joto jawar jayga ase check kore list e add kortese
       new_cost = cost + 1 # Sob node er cost parent node er cost theke 1 beshi.
       h_new = gen_h(new_node) + new_cost
-      heappush(queue,(h_new,cost,new_node,path + [maybe_paths[new_node]])) # Existing jei path ase oi path er sathe new dhore ana node add
+      heappush(queue,(h_new,cost,new_node,path + [b[new_node]])) # Existing jei path ase oi path er sathe new dhore ana node add
 # Basically jei node jei path ei jak shei path e nije nije store korbe and goal e jei node reach korbe oitar path return korbo
     return a_star(queue)
 

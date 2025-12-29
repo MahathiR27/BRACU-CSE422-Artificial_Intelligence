@@ -207,11 +207,12 @@ for j in range (6): # Creating start population
     x.append(generate_node(i))
   c_population.append(x)
 
+# Task 1:
 
-# fitness(main(),"OUTPUT")
+fitness(main(),"OUTPUT")
 
 # Task 2:
 
 # main("TWO") for 2 point cross over
 # fitness({population}, "OUTPUT") for printing best fit stats
-fitness(main("TWO"),"OUTPUT") 
+# fitness(main("TWO"),"OUTPUT") 
